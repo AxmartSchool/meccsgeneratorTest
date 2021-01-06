@@ -25,15 +25,133 @@ namespace meccsgeneratorTest
             //new Resztvevo() { Id = 14, Nev = "Karcsi" },
             //new Resztvevo() { Id = 15, Nev = "Karcsi" },
             //new Resztvevo() { Id = 16, Nev = "Karcsi" },
-        }; 
+        };
+
+        static Dictionary<int, Meccs>[] VersenyAllas;
 
         static void Main(string[] args)
         {
             
-            Seedeles(Resztvevok, true);
+            VersenyAllas = Seedeles(Resztvevok, true);
+            AllasKiirasa();
+            EredmenytBekuld(0,5,2,1);
+            EredmenytBekuld(0,6,2,1);
+            EredmenytBekuld(0,7,2,1);
+            EredmenytBekuld(1,0,2,1);
+            EredmenytBekuld(1,1,2,1);
+            EredmenytBekuld(1,2,2,1);
+            EredmenytBekuld(1,3,2,1);
+            EredmenytBekuld(2,0,2,1);
+            EredmenytBekuld(2,1,2,1);
+            EredmenytBekuld(3,0,2,1);
+            EredmenytBekuld(3,1,2,1);
+            AllasKiirasa();
+            HelyezesekKiirasa();
 
 
             Console.ReadKey();
+        }
+
+        private static void HelyezesekKiirasa()
+        {
+            if (VersenyAllas[VersenyAllas.Length - 1][0].KihivoPontszam > VersenyAllas[VersenyAllas.Length - 1][0].KihivottPontszam)
+            {
+                Console.WriteLine($"1. Helyezes {VersenyAllas[VersenyAllas.Length - 1][0].KihivoId}");
+                Console.WriteLine($"2. Helyezes {VersenyAllas[VersenyAllas.Length - 1][0].KihivottId}");
+            }
+            else
+            {
+                Console.WriteLine($"1. Helyezes {VersenyAllas[VersenyAllas.Length - 1][0].KihivottId}");
+                Console.WriteLine($"2. Helyezes {VersenyAllas[VersenyAllas.Length - 1][0].KihivoId}");
+            }
+
+            if (VersenyAllas[VersenyAllas.Length - 1].Count > 1)
+            {
+                if (VersenyAllas[VersenyAllas.Length - 1][1].KihivoPontszam > VersenyAllas[VersenyAllas.Length - 1][1].KihivottPontszam)
+                {
+                    Console.WriteLine($"3. Helyezes {VersenyAllas[VersenyAllas.Length - 1][1].KihivoId}");
+                    Console.WriteLine($"4. Helyezes {VersenyAllas[VersenyAllas.Length - 1][1].KihivottId}");
+                }
+                else
+                {
+                    Console.WriteLine($"3. Helyezes {VersenyAllas[VersenyAllas.Length - 1][1].KihivottId}");
+                    Console.WriteLine($"4. Helyezes {VersenyAllas[VersenyAllas.Length - 1][1].KihivoId}");
+                }
+            }
+            
+        }
+
+        private static void AllasKiirasa()
+        {
+            for (int i = 0; i < VersenyAllas.Length; i++)
+            {
+                Console.WriteLine($"{i + 1} Kor\n");
+                for (int j = 0; j < VersenyAllas[i].Count; j++)
+                {
+
+                    Console.WriteLine($"{j} meccs, Kihivo : {VersenyAllas[i][j].KihivoId}\t Kihivott: {VersenyAllas[i][j].KihivottId} \t Statusz: {VersenyAllas[i][j].Statusz}");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        private static void EredmenytBekuld(int kor, int meccsId, int kihivoPontszam, int KihivottPontszam)
+        {
+            VersenyAllas[kor][meccsId].KihivoPontszam = kihivoPontszam;
+            VersenyAllas[kor][meccsId].KihivottPontszam = KihivottPontszam;
+            VersenyAllas[kor][meccsId].Statusz = "Lejatszott";
+            int nyertesId;
+            int vesztesId;
+            if (kihivoPontszam > KihivottPontszam)
+            {
+                nyertesId = VersenyAllas[kor][meccsId].KihivoId;
+                vesztesId = VersenyAllas[kor][meccsId].KihivottId;
+            }
+            else
+            {
+                nyertesId = VersenyAllas[kor][meccsId].KihivottId;
+                vesztesId = VersenyAllas[kor][meccsId].KihivoId;
+            }
+
+            // Harmadik helyezes check
+            if (VersenyAllas[VersenyAllas.Length-1].Count > 1)
+            {
+                // Van harmadik kor
+                if (kor == VersenyAllas.Length -2)
+                {
+                    if (meccsId % 2 == 0)
+                    {
+                        VersenyAllas[VersenyAllas.Length - 1][1].KihivoId = vesztesId;
+                    }
+                    else
+                    {
+                        VersenyAllas[VersenyAllas.Length - 1][1].KihivottId = vesztesId;
+                        VersenyAllas[VersenyAllas.Length - 1][1].Statusz = "Keszen All";
+                    }
+
+
+                }
+            }
+
+            if (VersenyAllas.Length == kor+1)
+            {
+                return;
+                //verseny vege;
+            }
+
+            if (meccsId % 2 == 0)
+            {
+                VersenyAllas[kor + 1][meccsId / 2].KihivoId = VersenyAllas[kor][meccsId].KihivoId = nyertesId;
+            }
+            else
+            {
+                VersenyAllas[kor + 1][(meccsId-1) / 2].KihivottId = VersenyAllas[kor][meccsId].KihivoId = nyertesId;
+                VersenyAllas[kor + 1][(meccsId - 1) / 2].Statusz = "Keszen All";
+            }
+
+            
+
+
         }
 
         private static Dictionary<int, Meccs>[] Seedeles(List<Resztvevo> resztvevok, bool harmadikHelyezes)
@@ -143,17 +261,8 @@ namespace meccsgeneratorTest
             }
 
 
-            // Kiiras
-            for (int i = 0; i < korok.Length; i++)
-            {
-                Console.WriteLine($"{i+1} Kor\n");
-                for (int j = 0; j < korok[i].Count; j++)
-                {
 
-                    Console.WriteLine($"{j} meccs, Kihivo : {korok[i][j].KihivoId}\t Kihivott: {korok[i][j].KihivottId} \t Statusz: {korok[i][j].Statusz}");
-                }
-                Console.WriteLine();
-            }
+            
 
             return korok;
 
